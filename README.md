@@ -1,22 +1,22 @@
 # Prenotazioni — gestionale alberghiero
 
-Monorepo privato per un singolo albergo.
+Progetto privato per un singolo albergo: frontend React/Vite, backend FastAPI e database PostgreSQL su Supabase. L'autenticazione usa Supabase Auth; i permessi degli operatori sono in `public.app_users`.
 
-## Componenti
-- `frontend/`: React + TypeScript (fase successiva)
-- `backend/`: FastAPI e SQLAlchemy
-- `database/`: schema PostgreSQL di riferimento
+## Prima prova in locale
 
-## Avvio backend
+**Backend**: seguire `backend/README.md`. Occorre impostare `DATABASE_URL` nel file locale `backend/.env` con la stringa PostgreSQL del progetto Supabase; non pubblicarla.
+
+**Frontend** (Node.js 20+):
+
 ```bash
-cd backend
-python -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
-uvicorn app.main:app --reload
+cd frontend
+cp .env.example .env  # Windows: copy .env.example .env
+npm install
+npm run dev
 ```
-Su Windows: `.venv\Scripts\activate`.
 
-Copiare `.env.example` in `.env` e impostare `DATABASE_URL` solo nell'ambiente server. Non committare segreti.
+Aprire `http://localhost:5173` e accedere con `zantium@tiscali.it` e la password impostata in Supabase Authentication. La chiave publishable nel frontend è pubblica per definizione; la password del database e ogni secret key devono restare esclusivamente lato server.
 
-API: `/health`, `/docs`. Nessun dato personale deve essere pubblicato senza autenticazione.
+L'API è raggiungibile a `http://localhost:8000/health` quando il backend è avviato. Le camere possono inizialmente essere vuote: non sono stati ancora inseriti dati di prova. Il planning attuale è una griglia dimostrativa e non mostra ancora l'occupazione reale.
+
+**Stato**: codice predisposto per prova locale; non ancora distribuito su hosting pubblico e non ancora collaudato end-to-end.
