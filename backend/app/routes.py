@@ -70,7 +70,7 @@ def select_room_blocks(db: Session, arrival: date, departure: date):
     return select(RoomBlock.room_id).where(RoomBlock.starts_on < departure, RoomBlock.ends_on > arrival)
 
 @router.get("/reservations", response_model=list[ReservationOut])
-def list_reservations(db: Session = Depends(get_db)):
+def list_reservations(db: Session = Depends(get_db), operator=Depends(require_reception)):
     return db.scalars(select(Reservation).order_by(Reservation.arrival.desc()).limit(200)).all()
 
 @router.post("/reservations", response_model=ReservationOut, status_code=201)
