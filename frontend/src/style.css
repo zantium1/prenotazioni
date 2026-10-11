@@ -15,3 +15,5 @@ select{font:inherit;padding:11px;border:1px solid #c8d1de;border-radius:8px;back
 .booking-form button{align-self:end}
 .occupied{background:#e1eaf8;color:#164f87;font-size:.85rem}
 @media(max-width:600px){.modal{padding:18px}.main-nav button{flex:1}.booking-form{grid-template-columns:1fr}}
+
+.version-label{font-size:.77rem;color:#63748a;text-align:right;margin-bottom:12px}.version-label a{color:#164f87;text-decoration:underline}
