@@ -6,6 +6,7 @@ import type { Assignment, Operator, Reservation, Room, RoomType } from "./api";
 import PlanningPage from "./pages/PlanningPage";
 import RoomsPage from "./pages/RoomsPage";
 import BookingsPage from "./pages/BookingsPage";
+import VersionLabel from "./components/VersionLabel";
 type Page = "planning" | "rooms" | "bookings";
 const today = new Date().toLocaleDateString("en-CA");
 export default function App(){
@@ -42,9 +43,9 @@ export default function App(){
    if(err)setError(err.message);
    setLoading(false);
  }
- if(!session)return <main className="login"><h1>Gestionale alberghiero</h1><form onSubmit={login}><h2>Accesso operatori</h2><label>Email<input type="email" required value={email} onChange={e=>setEmail(e.target.value)}/></label><label>Password<input type="password" required value={password} onChange={e=>setPassword(e.target.value)}/></label><button disabled={loading}>Accedi</button>{error&&<p role="alert" className="error">{error}</p>}</form></main>;
+ if(!session)return <main className="login"><VersionLabel/><h1>Gestionale alberghiero</h1><form onSubmit={login}><h2>Accesso operatori</h2><label>Email<input type="email" required value={email} onChange={e=>setEmail(e.target.value)}/></label><label>Password<input type="password" required value={password} onChange={e=>setPassword(e.target.value)}/></label><button disabled={loading}>Accedi</button>{error&&<p role="alert" className="error">{error}</p>}</form></main>;
  if(!operator)return <main className="login"><h1>Gestionale alberghiero</h1><p>{loading?"Caricamento…":error||"Utente non autorizzato"}</p><button onClick={()=>void supabase.auth.signOut()}>Esci</button></main>;
- return <main className="dashboard"><header><div><h1>Gestionale prenotazioni</h1><p>{operator.email} · {operator.role}</p></div><button className="secondary" onClick={()=>void supabase.auth.signOut()}>Esci</button></header>
+ return <main className="dashboard"><VersionLabel/><header><div><h1>Gestionale prenotazioni</h1><p>{operator.email} · {operator.role}</p></div><button className="secondary" onClick={()=>void supabase.auth.signOut()}>Esci</button></header>
  <nav className="main-nav" aria-label="Menu principale">
    <button className={page==="planning"?"selected":"secondary"} onClick={()=>setPage("planning")}>Planning</button>
    {operator.role!=="housekeeping"&&<button className={page==="bookings"?"selected":"secondary"} onClick={()=>setPage("bookings")}>Prenotazioni</button>}
