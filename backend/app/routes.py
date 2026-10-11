@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
+from .auth import require_reception
 from .database import get_db
 from .models import Guest, Reservation, Room, RoomAssignment, RoomType
 from .schemas import GuestCreate, ReservationCreate, ReservationOut, RoomCreate, RoomOut, RoomTypeCreate
@@ -15,7 +16,7 @@ def list_rooms(db: Session = Depends(get_db)):
     return db.scalars(select(Room).order_by(Room.number)).all()
 
 @router.post("/room-types", status_code=201)
-def create_room_type(payload: RoomTypeCreate, db: Session = Depends(get_db)):
+def create_room_type(payload: RoomTypeCreate, db: Session = Depends(get_db), operator=Depends(require_reception)):
     item = RoomType(**payload.model_dump())
     db.add(item)
     try:
@@ -27,7 +28,7 @@ def create_room_type(payload: RoomTypeCreate, db: Session = Depends(get_db)):
     return {"id": item.id}
 
 @router.post("/rooms", response_model=RoomOut, status_code=201)
-def create_room(payload: RoomCreate, db: Session = Depends(get_db)):
+def create_room(payload: RoomCreate, db: Session = Depends(get_db), operator=Depends(require_reception)):
     if not db.get(RoomType, payload.room_type_id):
         raise HTTPException(404, "Tipologia camera inesistente")
     item = Room(**payload.model_dump())
@@ -41,7 +42,7 @@ def create_room(payload: RoomCreate, db: Session = Depends(get_db)):
     return item
 
 @router.post("/guests", status_code=201)
-def create_guest(payload: GuestCreate, db: Session = Depends(get_db)):
+def create_guest(payload: GuestCreate, db: Session = Depends(get_db), operator=Depends(require_reception)):
     item = Guest(**payload.model_dump())
     db.add(item)
     db.commit()
@@ -58,9 +59,6 @@ def availability(arrival: date, departure: date, db: Session = Depends(get_db)):
         RoomAssignment.departure > arrival
     )
     # Blocks and inactive rooms must also be excluded.
-    from .models import Room
-    from sqlalchemy import text
-    blocked = text("select room_id from public.room_blocks where starts_on < :departure and ends_on > :arrival")
     rows = db.execute(select(Room).where(Room.active.is_(True), Room.id.not_in(occupied), Room.id.not_in(
         select_room_blocks(db, arrival, departure)
     )).order_by(Room.number)).scalars().all()
@@ -76,7 +74,7 @@ def list_reservations(db: Session = Depends(get_db)):
     return db.scalars(select(Reservation).order_by(Reservation.arrival.desc()).limit(200)).all()
 
 @router.post("/reservations", response_model=ReservationOut, status_code=201)
-def create_reservation(payload: ReservationCreate, db: Session = Depends(get_db)):
+def create_reservation(payload: ReservationCreate, db: Session = Depends(get_db), operator=Depends(require_reception)):
     from .models import RoomBlock
     if not db.get(Guest, payload.lead_guest_id):
         raise HTTPException(404, "Cliente inesistente")
