@@ -1,20 +1,26 @@
-# Backend API (sviluppo)
+# Backend FastAPI
 
-## Avvio
-1. Crea un ambiente virtuale e installa `pip install -r requirements-dev.txt`.
-2. Copia `.env.example` in `.env`.
-3. Configura `DATABASE_URL` con credenziali PostgreSQL server-side e `API_TOKEN` con un segreto lungo casuale.
-4. Avvia `uvicorn app.main:app --reload` dalla cartella `backend`.
-5. Esegui `pytest`.
+## Avvio locale
 
-## Endpoint
-`GET /health` non richiede autenticazione.
-Gli endpoint `/api/v1/*` richiedono `Authorization: Bearer <API_TOKEN>`.
-Sono disponibili `GET /api/v1/rooms`, `GET /api/v1/availability?arrival=YYYY-MM-DD&departure=YYYY-MM-DD`, `GET /api/v1/reservations`, `POST /api/v1/room-types`, `POST /api/v1/rooms`, `POST /api/v1/guests` e `POST /api/v1/reservations`.
+Dalla cartella `backend`:
 
-## Limiti prima della produzione
-- L'autenticazione a token condiviso è **solo temporanea**. Non inserire il token nel frontend React, nel browser o in GitHub.
-- Prima di collegare il frontend serve login per utente, sessioni sicure, autorizzazioni e audit.
-- Mancano ancora tariffazione, cancellazioni, check-in/out e gestione completa dei blocchi concorrenti.
-- Non sono ancora stati eseguiti test end-to-end sul database remoto.
-- Lo schema Supabase va esportato e versionato nel repository.
+```bash
+python -m venv .venv
+# macOS/Linux: source .venv/bin/activate
+# Windows: .venv\Scripts\activate
+pip install -r requirements-dev.txt
+cp .env.example .env  # Windows: copy .env.example .env
+uvicorn app.main:app --reload
+```
+
+Modificare `DATABASE_URL` in `.env` con la stringa di connessione PostgreSQL del progetto Supabase (Dashboard > Connect). La password database resta solo nel file locale del backend, mai nel frontend o nel repository. Se la password contiene caratteri speciali, codificarli per l'URL.
+
+Controllare `http://localhost:8000/health`. L'API protetta richiede il token di accesso Supabase Auth; l'utente deve avere una riga attiva in `public.app_users`.
+
+## Test
+
+```bash
+pytest
+```
+
+Il login via Supabase Auth è distinto dall'autorizzazione applicativa (`admin`, `reception`, `housekeeping`). Per la prova usare l'account amministratore già registrato. Non è stato ancora effettuato un collaudo end-to-end su server pubblicato.
