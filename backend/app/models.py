@@ -46,3 +46,11 @@ class RoomAssignment(Base):
     arrival: Mapped[date] = mapped_column(Date)
     departure: Mapped[date] = mapped_column(Date)
     status: Mapped[str] = mapped_column(String, default="active")
+
+class RoomBlock(Base):
+    __tablename__ = "room_blocks"
+    id: Mapped[int] = mapped_column(BigInteger, Identity(), primary_key=True)
+    room_id: Mapped[int] = mapped_column(BigInteger, ForeignKey("rooms.id"))
+    starts_on: Mapped[date] = mapped_column(Date)
+    ends_on: Mapped[date] = mapped_column(Date)
+    reason: Mapped[str] = mapped_column(String)
