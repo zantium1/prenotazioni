@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
 import type { Session } from "@supabase/supabase-js";
 import { getOperator, getPlanning, supabase } from "./api";
-import type { Assignment, Operator, Reservation, Room, RoomType } from "./api";
+import type { Assignment, DailyService, Operator, Reservation, Room, RoomType } from "./api";
 import PlanningPage from "./pages/PlanningPage";
 import RoomsPage from "./pages/RoomsPage";
 import BookingsPage from "./pages/BookingsPage";
@@ -15,11 +15,12 @@ export default function App(){
  const [email,setEmail]=useState("zantium@tiscali.it"),[password,setPassword]=useState("");
  const [page,setPage]=useState<Page>("planning"),[start,setStart]=useState(today);
  const [rooms,setRooms]=useState<Room[]>([]),[types,setTypes]=useState<RoomType[]>([]);
+ const [dailyServices,setDailyServices]=useState<DailyService[]>([]);
  const [reservations,setReservations]=useState<Reservation[]>([]),[assignments,setAssignments]=useState<Assignment[]>([]);
  const [loading,setLoading]=useState(true),[error,setError]=useState("");
  async function refresh(){
    const p=await getPlanning();
-   setRooms(p.rooms);setTypes(p.roomTypes);setReservations(p.reservations);setAssignments(p.assignments);
+   setRooms(p.rooms);setTypes(p.roomTypes);setReservations(p.reservations);setAssignments(p.assignments);setDailyServices(p.dailyServices);
  }
  useEffect(()=>{
    void supabase.auth.getSession().then(({data})=>setSession(data.session));
@@ -52,9 +53,9 @@ export default function App(){
    {operator.role==="admin"&&<button className={page==="rooms"?"selected":"secondary"} onClick={()=>setPage("rooms")}>Anagrafica camere</button>}
  </nav>
  {loading?<p>Caricamento…</p>:<>
- {page==="planning"&&<PlanningPage rooms={rooms} reservations={reservations} assignments={assignments} start={start} setStart={setStart}/>}
+ {page==="planning"&&<PlanningPage rooms={rooms} reservations={reservations} assignments={assignments} dailyServices={dailyServices} onSaved={refresh} start={start} setStart={setStart}/>}
  {page==="rooms"&&operator.role==="admin"&&<RoomsPage rooms={rooms} types={types} onSaved={refresh}/>}
- {page==="bookings"&&operator.role!=="housekeeping"&&<BookingsPage rooms={rooms} reservations={reservations} assignments={assignments} onSaved={refresh}/>}
+ {page==="bookings"&&operator.role!=="housekeeping"&&<BookingsPage rooms={rooms} reservations={reservations} assignments={assignments} dailyServices={dailyServices} onSaved={refresh}/>}
  </>}
  {error&&<p className="error" role="alert">{error}</p>}
  </main>;
