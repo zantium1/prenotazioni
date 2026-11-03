@@ -17,7 +17,8 @@ export default function BookingsPage({ rooms, reservations, assignments, dailySe
   const [birthDate,setBirthDate]=useState("");
   const [taxCode,setTaxCode]=useState("");
   const [adults,setAdults]=useState(1);
-  const [children,setChildren]=useState(0);
+  const [children06,setChildren06]=useState(0);
+  const [children712,setChildren712]=useState(0);
   const [total, setTotal] = useState("0");
   const [originalEmail, setOriginalEmail] = useState("");
   const [detail, setDetail] = useState<Reservation | null>(null);
@@ -26,18 +27,18 @@ export default function BookingsPage({ rooms, reservations, assignments, dailySe
   async function submit(e: FormEvent) {
     e.preventDefault();
     setMessage("");
-    if (!room || !arrival || !departure || departure <= arrival) { setMessage("Controlla camera e date."); return; }
+    if (!room || !arrival || !departure || departure <= arrival || adults+children06+children712<1) { setMessage("Controlla camera e date."); return; }
     setBusy(true);
     try {
-      const { data, error } = await supabase.rpc("create_hotel_reservation_with_occupancy", {
+      const { data, error } = await supabase.rpc("create_hotel_reservation_with_age_groups", {
         p_room_id: room, p_arrival: arrival, p_departure: departure,
         p_first_name: first, p_last_name: last, p_total: Number(total),
-        p_original_email: originalEmail, p_birth_date: birthDate || null, p_tax_code: taxCode.trim().toUpperCase(),p_adults_count:adults,p_children_count:children
+        p_original_email: originalEmail, p_birth_date: birthDate || null, p_tax_code: taxCode.trim().toUpperCase(),p_adults_count:adults,p_children_0_6_count:children06,p_children_7_12_count:children712
       });
       if (error) throw error;
       await onSaved();
       setMessage("Prenotazione creata: " + data);
-      setAdults(1);setChildren(0);setFirst(""); setLast(""); setBirthDate(""); setTaxCode(""); setOriginalEmail("");
+      setAdults(1);setChildren06(0);setChildren712(0);setFirst(""); setLast(""); setBirthDate(""); setTaxCode(""); setOriginalEmail("");
     } catch (e) { setMessage(e instanceof Error ? e.message : String(e)); }
     finally { setBusy(false); }
   }
@@ -61,8 +62,9 @@ export default function BookingsPage({ rooms, reservations, assignments, dailySe
         <label>Data di nascita<input type="date" max={new Date().toISOString().slice(0,10)} value={birthDate} onChange={e=>setBirthDate(e.target.value)}/></label>
         <label>Codice fiscale<input maxLength={16} autoCapitalize="characters" placeholder="16 caratteri" value={taxCode} onChange={e=>setTaxCode(e.target.value.toUpperCase())}/></label>
         <div className="full-width"><IdentityScanner onMRZ={m=>{setFirst(m.first);setLast(m.last);setBirthDate(m.birth);}} onCF={setTaxCode}/></div>
-        <label>Ospiti adulti<input required type="number" min={1} max={30} step={1} value={adults} onChange={e=>setAdults(Number(e.target.value))}/></label>
-        <label>Ospiti bambini<input required type="number" min={0} max={30} step={1} value={children} onChange={e=>setChildren(Number(e.target.value))}/></label>
+        <label>Ospiti adulti<input required type="number" min={0} max={100} step={1} value={adults} onChange={e=>setAdults(Number(e.target.value))}/></label>
+        <label>Bambini 0–6 anni<input required type="number" min={0} max={100} step={1} value={children06} onChange={e=>setChildren06(Number(e.target.value))}/></label>
+        <label>Bambini 7–12 anni<input required type="number" min={0} max={100} step={1} value={children712} onChange={e=>setChildren712(Number(e.target.value))}/></label>
         <label>Totale previsto (€)<input required type="number" min={0} step="0.01" value={total} onChange={e => setTotal(e.target.value)} /></label>
         <label className="full-width">Testo originale dell'email<textarea rows={7} maxLength={50000} placeholder="Incolla qui il testo della mail del cliente…" value={originalEmail} onChange={e => setOriginalEmail(e.target.value)} /></label>
         <button disabled={busy || !room}>{busy ? "Salvataggio…" : "Conferma prenotazione"}</button>
