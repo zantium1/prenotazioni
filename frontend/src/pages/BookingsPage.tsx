@@ -74,7 +74,7 @@ export default function BookingsPage({ rooms, reservations, assignments, dailySe
         <div className="toolbar"><h2 id="booking-detail-title">Dettaglio prenotazione</h2><button className="secondary" onClick={() => setDetail(null)} aria-label="Chiudi">✕</button></div>
         <p><strong>Codice:</strong> {detail.code}</p>
         <p><strong>Ospite:</strong> {guestName(detail)}</p>
-        <p><strong>Data di nascita:</strong> {${name}.guest?.birth_date || "—"} · <strong>Codice fiscale:</strong> {${name}.guest?.tax_code || "—"}</p>
+        <p><strong>Data di nascita:</strong> {detail.guest?.birth_date || "—"} · <strong>Codice fiscale:</strong> {detail.guest?.tax_code || "—"}</p>
         <p><strong>Camera:</strong> {roomNumber(detail)}</p>
         <p><strong>Arrivo:</strong> {detail.arrival} · <strong>Partenza:</strong> {detail.departure}</p>
         <p><strong>Stato:</strong> {detail.status} · <strong>Totale:</strong> € {detail.total}</p>
