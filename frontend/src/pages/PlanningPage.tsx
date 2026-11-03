@@ -3,7 +3,7 @@ import DailyServicesEditor from "../components/DailyServicesEditor";
 import StayCost from "../components/StayCost";
 import GuestEditor from "../components/GuestEditor";
 import OccupancyEditor from "../components/OccupancyEditor";
-import type { Assignment, DailyService, RoomType, ServicePrice, Season, SeasonPeriod, SeasonOverride, SeasonRate, SeasonBeachRate, SeasonRoomPrice, SeasonMealPrice, Reservation, Room } from "../api";
+import type { Assignment, DailyService, RoomType, ServicePrice, Season, SeasonPeriod, SeasonOverride, SeasonRate, SeasonBeachRate, SeasonRoomPrice, SeasonMealPrice, SeasonGuestSupplement, Reservation, Room } from "../api";
 
 function addDays(day: string, count: number) {
   const d = new Date(day + "T12:00:00Z");
