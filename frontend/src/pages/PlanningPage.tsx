@@ -1,5 +1,6 @@
 import { useState } from "react";
-import type { Assignment, Reservation, Room } from "../api";
+import DailyServicesEditor from "../components/DailyServicesEditor";
+import type { Assignment, DailyService, Reservation, Room } from "../api";
 
 function addDays(day: string, count: number) {
   const d = new Date(day + "T12:00:00Z");
@@ -9,8 +10,8 @@ function addDays(day: string, count: number) {
 function guestName(booking: Reservation | undefined) {
   return booking?.guest ? `${booking.guest.first_name} ${booking.guest.last_name}` : "Ospite";
 }
-export default function PlanningPage({ rooms, reservations, assignments, start, setStart }: {
-  rooms: Room[]; reservations: Reservation[]; assignments: Assignment[];
+export default function PlanningPage({ rooms, reservations, assignments, dailyServices, onSaved, start, setStart }: {
+  rooms: Room[]; reservations: Reservation[]; assignments: Assignment[]; dailyServices: DailyService[]; onSaved: () => Promise<void>;
   start: string; setStart: (s: string) => void;
 }) {
   const [selected, setSelected] = useState<Reservation | null>(null);
@@ -25,6 +26,7 @@ export default function PlanningPage({ rooms, reservations, assignments, start, 
       <div className="toolbar"><div><h2>Planning settimanale</h2><p className="planning-hint">Nome dell'ospite nelle giornate occupate. Seleziona una prenotazione per i dettagli.</p></div>
         <label>Dal giorno<input type="date" value={start} onChange={e => setStart(e.target.value)} /></label>
       </div>
+      <div className="planning-legend" aria-label="Legenda planning"><span>🍽️ Solo pernottamento: nessuna sigla</span><span>🍽️ MP Mezza pensione</span><span>🍽️ PC Pensione completa</span><span>🏖️½ Mattina</span><span>🌤️½ Pomeriggio</span><span>🏖️ Giornata intera</span></div>
       <div className="table-scroll">
         <table className="planning-table">
           <thead><tr><th>Camera</th>{days.map(d => <th key={d}>{d.slice(8, 10)}/{d.slice(5, 7)}</th>)}</tr></thead>
@@ -34,11 +36,13 @@ export default function PlanningPage({ rooms, reservations, assignments, start, 
               const assignment = assignments.find(a => a.room_id === room.id && a.status === "active" && a.arrival <= day && a.departure > day);
               const booking = assignment ? bookings.get(assignment.reservation_id) : undefined;
               const name = guestName(booking);
+              const service = booking ? dailyServices.find(s => s.reservation_id === booking.id && s.service_date === day) : undefined;
               return <td key={day} className={assignment ? "occupied" : "free-cell"}>
                 {assignment ? <button type="button" className="planning-booking" disabled={!booking}
                   title={booking ? `${name} · ${booking.arrival} → ${booking.departure} · ${booking.code}` : "Camera occupata"}
                   onClick={() => booking && setSelected(booking)}>
                   <span className="planning-guest">{name}</span>
+                  <span className="planning-icons">{service?.meal_plan === "half_board" ? "🍽️ MP" : service?.meal_plan === "full_board" ? "🍽️ PC" : ""}{service?.beach_use === "morning" ? " 🏖️½" : service?.beach_use === "afternoon" ? " 🌤️½" : service?.beach_use === "full_day" ? " 🏖️" : ""}</span>
                   <span className="planning-sub">{assignment.arrival === day ? "Arrivo" : assignment.departure === addDays(day, 1) ? "Partenza domani" : "Soggiorno"}</span>
                 </button> : <span aria-label="Libera">—</span>}
               </td>;
@@ -56,6 +60,7 @@ export default function PlanningPage({ rooms, reservations, assignments, start, 
         <p><strong>Partenza:</strong> {selected.departure}</p>
         <p><strong>Stato:</strong> {selected.status}</p>
         <p><strong>Totale:</strong> € {selected.total}</p>
+        <DailyServicesEditor booking={selected} services={dailyServices} onSaved={onSaved}/>
         <label>Email originale<textarea readOnly rows={8} value={selected.original_email ?? ""} placeholder="Nessuna email salvata." /></label>
         <div className="actions"><button onClick={() => setSelected(null)}>Chiudi</button></div>
       </div>
