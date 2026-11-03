@@ -6,9 +6,9 @@ import StayCost from "../components/StayCost";
 import GuestEditor from "../components/GuestEditor";
 import OccupancyEditor from "../components/OccupancyEditor";
 import IdentityScanner from "../components/IdentityScanner";
-import type { Room, Reservation, Assignment, DailyService, RoomType, ServicePrice } from "../api";
+import type { Room, Reservation, Assignment, DailyService, RoomType, ServicePrice, Season, SeasonPeriod, SeasonOverride, SeasonRate, SeasonBeachRate } from "../api";
 
-export default function BookingsPage({ rooms, reservations, assignments, dailyServices, types, prices, onSaved }: { rooms: Room[]; reservations: Reservation[]; assignments: Assignment[]; dailyServices: DailyService[]; types: RoomType[]; prices: ServicePrice[]; onSaved: () => Promise<void> }) {
+export default function BookingsPage({ rooms, reservations, assignments, dailyServices, types, prices, seasonData, onSaved }: { rooms: Room[]; reservations: Reservation[]; assignments: Assignment[]; dailyServices: DailyService[]; types: RoomType[]; prices: ServicePrice[]; seasonData:{seasons:Season[];periods:SeasonPeriod[];overrides:SeasonOverride[];rates:SeasonRate[];beach:SeasonBeachRate[]}; onSaved: () => Promise<void> }) {
   const [room, setRoom] = useState(0);
   const [arrival, setArrival] = useState("");
   const [departure, setDeparture] = useState("");
@@ -88,7 +88,7 @@ export default function BookingsPage({ rooms, reservations, assignments, dailySe
         <p><strong>Arrivo:</strong> {detail.arrival} · <strong>Partenza:</strong> {detail.departure}</p>
         <p><strong>Stato:</strong> {detail.status} · <strong>Totale:</strong> € {detail.total}</p>
         <DailyServicesEditor booking={detail} services={dailyServices} onSaved={onSaved} />
-        <StayCost booking={detail} rooms={rooms} types={types} assignments={assignments} daily={dailyServices} prices={prices}/>
+        <StayCost booking={detail} rooms={rooms} types={types} assignments={assignments} daily={dailyServices} prices={prices} seasonData={seasonData}/>
         <label>Email originale del cliente<textarea readOnly rows={12} value={detail.original_email || ""} placeholder="Nessuna email registrata per questa prenotazione." /></label>
         <div className="actions"><button onClick={() => setDetail(null)}>Chiudi</button></div>
       </div>
