@@ -57,6 +57,7 @@ export default function PlanningPage({ rooms, reservations, assignments, dailySe
       <div className="modal booking-detail" role="dialog" aria-modal="true" aria-labelledby="planning-detail-title">
         <div className="toolbar"><h2 id="planning-detail-title">Prenotazione {selected.code}</h2><button className="secondary" onClick={() => setSelected(null)} aria-label="Chiudi">✕</button></div>
         <p><strong>Ospite:</strong> {guestName(selected)}</p>
+        <p><strong>Data di nascita:</strong> {${name}.guest?.birth_date || "—"} · <strong>Codice fiscale:</strong> {${name}.guest?.tax_code || "—"}</p>
         <p><strong>Arrivo:</strong> {selected.arrival}</p>
         <p><strong>Partenza:</strong> {selected.departure}</p>
         <p><strong>Stato:</strong> {selected.status}</p>
