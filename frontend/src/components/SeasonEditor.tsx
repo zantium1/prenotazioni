@@ -1,0 +1,17 @@
+import { useEffect,useState } from "react";
+import { supabase } from "../api";
+type Season={id:number;name:string;sort_order:number};
+type Period={id:number;season_id:number;start_date:string;end_date:string;description:string};
+export default function SeasonEditor(){
+ const [seasons,setSeasons]=useState<Season[]>([]),[periods,setPeriods]=useState<Period[]>([]),[busy,setBusy]=useState(false),[message,setMessage]=useState("");
+ const [draft,setDraft]=useState<Period|null>(null);
+ async function load(){const [a,b]=await Promise.all([supabase.from("hotel_seasons").select("id,name,sort_order").order("sort_order"),supabase.from("hotel_season_periods").select("id,season_id,start_date,end_date,description").order("start_date")]);if(a.error)throw a.error;if(b.error)throw b.error;setSeasons(a.data||[]);setPeriods(b.data||[]);}
+ useEffect(()=>{void load().catch(e=>setMessage(String(e)));},[]);
+ async function act(action:"insert"|"update"|"delete",p:Period){if(action==="delete"&&!window.confirm("Eliminare questo periodo?"))return;setBusy(true);setMessage("");try{const {error}=await supabase.rpc("manage_hotel_season_period",{p_action:action,p_id:p.id||null,p_season_id:p.season_id,p_start_date:p.start_date,p_end_date:p.end_date,p_description:p.description});if(error)throw error;await load();setDraft(null);setMessage("Periodi stagionali aggiornati.");}catch(e){setMessage(e instanceof Error?e.message:String(e));}finally{setBusy(false);}}
+ return <section className="season-editor"><h3>Stagioni e periodi</h3><p>Periodi validi per il 2026. I giorni festivi (Natale, Capodanno e Pasqua) richiedono date precise: aggiungili modificando i periodi esistenti. Nessuna tariffa viene cambiata automaticamente.</p>
+ <div className="table-scroll"><table><thead><tr><th>Dal</th><th>Al</th><th>Stagione</th><th>Note</th><th>Azioni</th></tr></thead><tbody>{periods.map(p=><tr key={p.id}><td>{p.start_date}</td><td>{p.end_date}</td><td>{seasons.find(s=>s.id===p.season_id)?.name}</td><td>{p.description}</td><td><button type="button" className="secondary" onClick={()=>setDraft({...p})}>Modifica</button> <button type="button" className="secondary" disabled={busy} onClick={()=>void act("delete",p)}>Elimina</button></td></tr>)}</tbody></table></div>
+ <button type="button" className="secondary" onClick={()=>setDraft({id:0,season_id:seasons[0]?.id??0,start_date:"2026-01-01",end_date:"2026-01-01",description:""})}>+ Aggiungi periodo</button>
+ {draft&&<div className="season-form"><h4>{draft.id?"Modifica periodo":"Nuovo periodo"}</h4><div className="price-grid"><label>Dal<input type="date" value={draft.start_date} onChange={e=>setDraft({...draft,start_date:e.target.value})}/></label><label>Al<input type="date" value={draft.end_date} onChange={e=>setDraft({...draft,end_date:e.target.value})}/></label><label>Stagione<select value={draft.season_id} onChange={e=>setDraft({...draft,season_id:Number(e.target.value)})}>{seasons.map(s=><option key={s.id} value={s.id}>{s.name}</option>)}</select></label><label>Descrizione<input maxLength={200} value={draft.description} onChange={e=>setDraft({...draft,description:e.target.value})}/></label></div><div className="actions"><button type="button" className="secondary" onClick={()=>setDraft(null)}>Annulla</button><button type="button" disabled={busy} onClick={()=>void act(draft.id?"update":"insert",draft)}>{busy?"Salvataggio…":"Salva periodo"}</button></div></div>}
+ {message&&<p role="status">{message}</p>}
+ </section>;
+}
