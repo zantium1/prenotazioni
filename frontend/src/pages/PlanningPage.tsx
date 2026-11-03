@@ -14,7 +14,7 @@ function guestName(booking: Reservation | undefined) {
   return booking?.guest ? `${booking.guest.first_name} ${booking.guest.last_name}` : "Ospite";
 }
 export default function PlanningPage({ rooms, reservations, assignments, dailyServices, types, prices, seasonData, onSaved, start, setStart }: {
-  rooms: Room[]; reservations: Reservation[]; assignments: Assignment[]; dailyServices: DailyService[]; types: RoomType[]; prices: ServicePrice[]; seasonData:{seasons:Season[];periods:SeasonPeriod[];overrides:SeasonOverride[];rates:SeasonRate[];beach:SeasonBeachRate[];roomPrices:SeasonRoomPrice[];mealPrices:SeasonMealPrice[]}; onSaved: () => Promise<void>;
+  rooms: Room[]; reservations: Reservation[]; assignments: Assignment[]; dailyServices: DailyService[]; types: RoomType[]; prices: ServicePrice[]; seasonData:{seasons:Season[];periods:SeasonPeriod[];overrides:SeasonOverride[];rates:SeasonRate[];beach:SeasonBeachRate[];roomPrices:SeasonRoomPrice[];mealPrices:SeasonMealPrice[];supplements:SeasonGuestSupplement[]}; onSaved: () => Promise<void>;
   start: string; setStart: (s: string) => void;
 }) {
   const [selected, setSelected] = useState<Reservation | null>(null);
