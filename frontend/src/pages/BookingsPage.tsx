@@ -3,6 +3,7 @@ import type { FormEvent } from "react";
 import { supabase } from "../api";
 import DailyServicesEditor from "../components/DailyServicesEditor";
 import StayCost from "../components/StayCost";
+import GuestEditor from "../components/GuestEditor";
 import IdentityScanner from "../components/IdentityScanner";
 import type { Room, Reservation, Assignment, DailyService, RoomType, ServicePrice } from "../api";
 
@@ -74,7 +75,7 @@ export default function BookingsPage({ rooms, reservations, assignments, dailySe
         <div className="toolbar"><h2 id="booking-detail-title">Dettaglio prenotazione</h2><button className="secondary" onClick={() => setDetail(null)} aria-label="Chiudi">✕</button></div>
         <p><strong>Codice:</strong> {detail.code}</p>
         <p><strong>Ospite:</strong> {guestName(detail)}</p>
-        <p><strong>Data di nascita:</strong> {detail.guest?.birth_date || "—"} · <strong>Codice fiscale:</strong> {detail.guest?.tax_code || "—"}</p>
+        <GuestEditor booking={detail} onSaved={onSaved}/>
         <p><strong>Camera:</strong> {roomNumber(detail)}</p>
         <p><strong>Arrivo:</strong> {detail.arrival} · <strong>Partenza:</strong> {detail.departure}</p>
         <p><strong>Stato:</strong> {detail.status} · <strong>Totale:</strong> € {detail.total}</p>
