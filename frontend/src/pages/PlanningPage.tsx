@@ -3,7 +3,7 @@ import DailyServicesEditor from "../components/DailyServicesEditor";
 import StayCost from "../components/StayCost";
 import GuestEditor from "../components/GuestEditor";
 import OccupancyEditor from "../components/OccupancyEditor";
-import type { Assignment, DailyService, RoomType, ServicePrice, Reservation, Room } from "../api";
+import type { Assignment, DailyService, RoomType, ServicePrice, Season, SeasonPeriod, SeasonOverride, SeasonRate, SeasonBeachRate, Reservation, Room } from "../api";
 
 function addDays(day: string, count: number) {
   const d = new Date(day + "T12:00:00Z");
@@ -13,8 +13,8 @@ function addDays(day: string, count: number) {
 function guestName(booking: Reservation | undefined) {
   return booking?.guest ? `${booking.guest.first_name} ${booking.guest.last_name}` : "Ospite";
 }
-export default function PlanningPage({ rooms, reservations, assignments, dailyServices, types, prices, onSaved, start, setStart }: {
-  rooms: Room[]; reservations: Reservation[]; assignments: Assignment[]; dailyServices: DailyService[]; types: RoomType[]; prices: ServicePrice[]; onSaved: () => Promise<void>;
+export default function PlanningPage({ rooms, reservations, assignments, dailyServices, types, prices, seasonData, onSaved, start, setStart }: {
+  rooms: Room[]; reservations: Reservation[]; assignments: Assignment[]; dailyServices: DailyService[]; types: RoomType[]; prices: ServicePrice[]; seasonData:{seasons:Season[];periods:SeasonPeriod[];overrides:SeasonOverride[];rates:SeasonRate[];beach:SeasonBeachRate[]}; onSaved: () => Promise<void>;
   start: string; setStart: (s: string) => void;
 }) {
   const [selected, setSelected] = useState<Reservation | null>(null);
@@ -66,7 +66,7 @@ export default function PlanningPage({ rooms, reservations, assignments, dailySe
         <p><strong>Stato:</strong> {selected.status}</p>
         <p><strong>Totale:</strong> € {selected.total}</p>
         <DailyServicesEditor booking={selected} services={dailyServices} onSaved={onSaved}/>
-        <StayCost booking={selected} rooms={rooms} types={types} assignments={assignments} daily={dailyServices} prices={prices}/>
+        <StayCost booking={selected} rooms={rooms} types={types} assignments={assignments} daily={dailyServices} prices={prices} seasonData={seasonData}/>
         <label>Email originale<textarea readOnly rows={8} value={selected.original_email ?? ""} placeholder="Nessuna email salvata." /></label>
         <div className="actions"><button onClick={() => setSelected(null)}>Chiudi</button></div>
       </div>
