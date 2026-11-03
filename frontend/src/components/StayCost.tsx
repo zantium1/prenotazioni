@@ -1,25 +1,39 @@
-import type { Assignment, DailyService, Reservation, Room, RoomType, ServicePrice } from "../api";
+import type { Assignment, DailyService, Reservation, Room, RoomType, ServicePrice, Season, SeasonPeriod, SeasonOverride, SeasonRate, SeasonBeachRate } from "../api";
 import { datesBetween } from "./DailyServicesEditor";
 const euro = (v:number)=>new Intl.NumberFormat("it-IT",{style:"currency",currency:"EUR"}).format(v);
-export function calculateStay(booking:Reservation,rooms:Room[],types:RoomType[],assignments:Assignment[],daily:DailyService[],prices:ServicePrice[]){
+export function calculateStay(booking:Reservation,rooms:Room[],types:RoomType[],assignments:Assignment[],daily:DailyService[],prices:ServicePrice[],seasonData?:{seasons:Season[];periods:SeasonPeriod[];overrides:SeasonOverride[];rates:SeasonRate[];beach:SeasonBeachRate[]}){
  const assigned=assignments.filter(a=>a.reservation_id===booking.id&&a.status==="active");
  const days=datesBetween(booking.arrival,booking.departure);
  const rate=(day:string)=>{const a=assigned.find(a=>a.arrival<=day&&a.departure>day);const room=rooms.find(r=>r.id===a?.room_id);return Number(types.find(t=>t.id===room?.room_type_id)?.base_rate??0);};
  const price=(code:string)=>Number(prices.find(p=>p.code===code)?.price??0);
  const rows=days.map(day=>{
   const s=daily.find(x=>x.reservation_id===booking.id&&x.service_date===day);
-  const room=rate(day);
-  const meal=s?.meal_plan==="half_board"?price("half_board"):s?.meal_plan==="full_board"?price("full_board"):0;
-  const beach=s?.beach_use==="full_day"?price("beach_full_day"):s?.beach_use==="morning"||s?.beach_use==="afternoon"?price("beach_half_day"):0;
-  return {day,room,meal,beach,total:room+meal+beach};
+  let room=rate(day);
+  let meal=s?.meal_plan==="half_board"?price("half_board"):s?.meal_plan==="full_board"?price("full_board"):0;
+  let beach=s?.beach_use==="full_day"?price("beach_full_day"):s?.beach_use==="morning"||s?.beach_use==="afternoon"?price("beach_half_day"):0;
+  const md=day.slice(5),year=Number(day.slice(0,4));
+  const override=seasonData?.overrides.filter(o=>o.month_day===md&&(o.year===null||o.year===year)).sort((a,b)=>Number(b.year!==null)-Number(a.year!==null))[0];
+  const seasonId=override?.season_id??seasonData?.periods.find(p=>p.start_md<=md&&p.end_md>=md)?.season_id;
+  const seasonName=seasonData?.seasons.find(x=>x.id===seasonId)?.name??"—";
+  const assignedRoom=assigned.find(a=>a.arrival<=day&&a.departure>day);
+  const roomTypeId=rooms.find(r=>r.id===assignedRoom?.room_id)?.room_type_id;
+  const mealPlan=s?.meal_plan??"room_only";
+  const counts:[string,number][]=[["adult",booking.adults_count],["child_0_6",booking.children_0_6_count],["child_7_12",booking.children_7_12_count]];
+  const relevant=counts.filter(([,n])=>n>0);
+  const rates=relevant.map(([group,count])=>({count,rate:seasonData?.rates.find(r=>r.season_id===seasonId&&r.room_type_id===roomTypeId&&r.guest_group===group&&r.meal_plan===mealPlan)}));
+  const seasonReady=Boolean(seasonId&&rates.length&&rates.every(x=>x.rate!==undefined));
+  if(seasonReady){room=rates.reduce((sum,x)=>sum+x.count*Number(x.rate?.price??0),0);meal=0;}
+  const beachCode=s?.beach_use==="full_day"?"full_day":s?.beach_use==="morning"||s?.beach_use==="afternoon"?"half_day":null;
+  if(beachCode&&seasonId){const bp=seasonData?.beach.find(b=>b.season_id===seasonId&&b.beach_use===beachCode);if(bp)beach=Number(bp.price);}
+  return {day,room,meal,beach,total:room+meal+beach,seasonName,seasonReady};
  });
  return {rows,roomTotal:rows.reduce((n,r)=>n+r.room,0),mealTotal:rows.reduce((n,r)=>n+r.meal,0),beachTotal:rows.reduce((n,r)=>n+r.beach,0),total:rows.reduce((n,r)=>n+r.total,0)};
 }
-export default function StayCost({booking,rooms,types,assignments,daily,prices}:{booking:Reservation;rooms:Room[];types:RoomType[];assignments:Assignment[];daily:DailyService[];prices:ServicePrice[]}){
- const c=calculateStay(booking,rooms,types,assignments,daily,prices);
+export default function StayCost({booking,rooms,types,assignments,daily,prices,seasonData}:{booking:Reservation;rooms:Room[];types:RoomType[];assignments:Assignment[];daily:DailyService[];prices:ServicePrice[];seasonData?:{seasons:Season[];periods:SeasonPeriod[];overrides:SeasonOverride[];rates:SeasonRate[];beach:SeasonBeachRate[]}}){
+ const c=calculateStay(booking,rooms,types,assignments,daily,prices,seasonData);
  return <section className="stay-cost"><h3>Preventivo soggiorno</h3><p>Calcolo automatico: una notte per ciascuna data dal giorno di arrivo al giorno precedente la partenza. I servizi si addebitano soltanto nei giorni in cui sono impostati.</p>
- <div className="table-scroll"><table><thead><tr><th>Giorno</th><th>Camera</th><th>Trattamento</th><th>Spiaggia</th><th>Totale</th></tr></thead><tbody>{c.rows.map(r=><tr key={r.day}><td>{r.day.slice(8)}/{r.day.slice(5,7)}</td><td>{euro(r.room)}</td><td>{euro(r.meal)}</td><td>{euro(r.beach)}</td><td><strong>{euro(r.total)}</strong></td></tr>)}</tbody></table></div>
+ <div className="table-scroll"><table><thead><tr><th>Giorno</th><th>Stagione</th><th>Camera / trattamento</th><th>Trattamento</th><th>Spiaggia</th><th>Totale</th></tr></thead><tbody>{c.rows.map(r=><tr key={r.day}><td>{r.day.slice(8)}/{r.day.slice(5,7)}</td><td>{r.seasonName}{!r.seasonReady?" *":""}</td><td>{euro(r.room)}</td><td>{euro(r.meal)}</td><td>{euro(r.beach)}</td><td><strong>{euro(r.total)}</strong></td></tr>)}</tbody></table></div>
  <div className="cost-summary"><span>Camere: {euro(c.roomTotal)}</span><span>Trattamento: {euro(c.mealTotal)}</span><span>Spiaggia: {euro(c.beachTotal)}</span><strong>Totale soggiorno: {euro(c.total)}</strong></div>
- <p className="cost-note">Prima bozza: importi calcolati sui listini attuali, senza sconti, acconti o tariffe storicizzate. Non costituisce ancora un conto definitivo.</p>
+ <p className="cost-note">* Dove mancano tariffe stagionali complete per gli occupanti, viene mantenuto il vecchio calcolo per camera. Le tariffe stagionali comprendono il trattamento, senza doppio addebito. Prima bozza: importi calcolati sui listini attuali, senza sconti, acconti o tariffe storicizzate. Non costituisce ancora un conto definitivo.</p>
  </section>;
 }
