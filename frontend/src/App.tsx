@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
 import type { Session } from "@supabase/supabase-js";
 import { getOperator, getPlanning, supabase } from "./api";
-import type { Assignment, DailyService, ServicePrice, Operator, Reservation, Room, RoomType, Season, SeasonPeriod, SeasonOverride, SeasonRate, SeasonBeachRate } from "./api";
+import type { Assignment, DailyService, ServicePrice, Operator, Reservation, Room, RoomType, Season, SeasonPeriod, SeasonOverride, SeasonRate, SeasonBeachRate, SeasonRoomPrice, SeasonMealPrice } from "./api";
 import PlanningPage from "./pages/PlanningPage";
 import RoomsPage from "./pages/RoomsPage";
 import BookingsPage from "./pages/BookingsPage";
@@ -19,11 +19,12 @@ export default function App(){
  const [dailyServices,setDailyServices]=useState<DailyService[]>([]);
  const [servicePrices,setServicePrices]=useState<ServicePrice[]>([]);
  const [seasons,setSeasons]=useState<Season[]>([]),[seasonPeriods,setSeasonPeriods]=useState<SeasonPeriod[]>([]),[seasonOverrides,setSeasonOverrides]=useState<SeasonOverride[]>([]),[seasonRates,setSeasonRates]=useState<SeasonRate[]>([]),[seasonBeachRates,setSeasonBeachRates]=useState<SeasonBeachRate[]>([]);
+ const [seasonRoomPrices,setSeasonRoomPrices]=useState<SeasonRoomPrice[]>([]),[seasonMealPrices,setSeasonMealPrices]=useState<SeasonMealPrice[]>([]);
  const [reservations,setReservations]=useState<Reservation[]>([]),[assignments,setAssignments]=useState<Assignment[]>([]);
  const [loading,setLoading]=useState(true),[error,setError]=useState("");
  async function refresh(){
    const p=await getPlanning();
-   setRooms(p.rooms);setTypes(p.roomTypes);setReservations(p.reservations);setAssignments(p.assignments);setDailyServices(p.dailyServices);setServicePrices(p.servicePrices);setSeasons(p.seasons);setSeasonPeriods(p.seasonPeriods);setSeasonOverrides(p.seasonOverrides);setSeasonRates(p.seasonRates);setSeasonBeachRates(p.seasonBeachRates);
+   setRooms(p.rooms);setTypes(p.roomTypes);setReservations(p.reservations);setAssignments(p.assignments);setDailyServices(p.dailyServices);setServicePrices(p.servicePrices);setSeasons(p.seasons);setSeasonPeriods(p.seasonPeriods);setSeasonOverrides(p.seasonOverrides);setSeasonRates(p.seasonRates);setSeasonBeachRates(p.seasonBeachRates);setSeasonRoomPrices(p.seasonRoomPrices);setSeasonMealPrices(p.seasonMealPrices);
  }
  useEffect(()=>{
    void supabase.auth.getSession().then(({data})=>setSession(data.session));
@@ -37,7 +38,7 @@ export default function App(){
      if(!mounted)return;
      setOperator(profile);
      const p=await getPlanning();
-     if(mounted){setRooms(p.rooms);setTypes(p.roomTypes);setReservations(p.reservations);setAssignments(p.assignments);setDailyServices(p.dailyServices);setServicePrices(p.servicePrices);setSeasons(p.seasons);setSeasonPeriods(p.seasonPeriods);setSeasonOverrides(p.seasonOverrides);setSeasonRates(p.seasonRates);setSeasonBeachRates(p.seasonBeachRates);setError("");}
+     if(mounted){setRooms(p.rooms);setTypes(p.roomTypes);setReservations(p.reservations);setAssignments(p.assignments);setDailyServices(p.dailyServices);setServicePrices(p.servicePrices);setSeasons(p.seasons);setSeasonPeriods(p.seasonPeriods);setSeasonOverrides(p.seasonOverrides);setSeasonRates(p.seasonRates);setSeasonBeachRates(p.seasonBeachRates);setSeasonRoomPrices(p.seasonRoomPrices);setSeasonMealPrices(p.seasonMealPrices);setError("");}
    }).catch(e=>{if(mounted){setError(e instanceof Error?e.message:String(e));setOperator(null);}})
    .finally(()=>{if(mounted)setLoading(false);});
    return ()=>{mounted=false;};
@@ -57,10 +58,10 @@ export default function App(){
    {operator.role==="admin"&&<button className={page==="rooms"?"selected":"secondary"} onClick={()=>setPage("rooms")}>Anagrafica camere</button>}
  </nav>
  {loading?<p>Caricamento…</p>:<>
- {page==="planning"&&<PlanningPage rooms={rooms} reservations={reservations} assignments={assignments} dailyServices={dailyServices} types={types} prices={servicePrices} seasonData={{seasons,periods:seasonPeriods,overrides:seasonOverrides,rates:seasonRates,beach:seasonBeachRates}} onSaved={refresh} start={start} setStart={setStart}/>}
+ {page==="planning"&&<PlanningPage rooms={rooms} reservations={reservations} assignments={assignments} dailyServices={dailyServices} types={types} prices={servicePrices} seasonData={{seasons,periods:seasonPeriods,overrides:seasonOverrides,rates:seasonRates,beach:seasonBeachRates,roomPrices:seasonRoomPrices,mealPrices:seasonMealPrices}} onSaved={refresh} start={start} setStart={setStart}/>}
  {page==="prices"&&operator.role==="admin"&&<PricesPage types={types} prices={servicePrices} onSaved={refresh}/>}
  {page==="rooms"&&operator.role==="admin"&&<RoomsPage rooms={rooms} types={types} onSaved={refresh}/>}
- {page==="bookings"&&operator.role!=="housekeeping"&&<BookingsPage rooms={rooms} reservations={reservations} assignments={assignments} dailyServices={dailyServices} types={types} prices={servicePrices} seasonData={{seasons,periods:seasonPeriods,overrides:seasonOverrides,rates:seasonRates,beach:seasonBeachRates}} onSaved={refresh}/>}
+ {page==="bookings"&&operator.role!=="housekeeping"&&<BookingsPage rooms={rooms} reservations={reservations} assignments={assignments} dailyServices={dailyServices} types={types} prices={servicePrices} seasonData={{seasons,periods:seasonPeriods,overrides:seasonOverrides,rates:seasonRates,beach:seasonBeachRates,roomPrices:seasonRoomPrices,mealPrices:seasonMealPrices}} onSaved={refresh}/>}
  </>}
  {error&&<p className="error" role="alert">{error}</p>}
  </main>;
