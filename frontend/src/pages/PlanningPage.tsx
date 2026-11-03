@@ -3,7 +3,7 @@ import DailyServicesEditor from "../components/DailyServicesEditor";
 import StayCost from "../components/StayCost";
 import GuestEditor from "../components/GuestEditor";
 import OccupancyEditor from "../components/OccupancyEditor";
-import type { Assignment, DailyService, RoomType, ServicePrice, Season, SeasonPeriod, SeasonOverride, SeasonRate, SeasonBeachRate, Reservation, Room } from "../api";
+import type { Assignment, DailyService, RoomType, ServicePrice, Season, SeasonPeriod, SeasonOverride, SeasonRate, SeasonBeachRate, SeasonRoomPrice, SeasonMealPrice, Reservation, Room } from "../api";
 
 function addDays(day: string, count: number) {
   const d = new Date(day + "T12:00:00Z");
@@ -14,7 +14,7 @@ function guestName(booking: Reservation | undefined) {
   return booking?.guest ? `${booking.guest.first_name} ${booking.guest.last_name}` : "Ospite";
 }
 export default function PlanningPage({ rooms, reservations, assignments, dailyServices, types, prices, seasonData, onSaved, start, setStart }: {
-  rooms: Room[]; reservations: Reservation[]; assignments: Assignment[]; dailyServices: DailyService[]; types: RoomType[]; prices: ServicePrice[]; seasonData:{seasons:Season[];periods:SeasonPeriod[];overrides:SeasonOverride[];rates:SeasonRate[];beach:SeasonBeachRate[]}; onSaved: () => Promise<void>;
+  rooms: Room[]; reservations: Reservation[]; assignments: Assignment[]; dailyServices: DailyService[]; types: RoomType[]; prices: ServicePrice[]; seasonData:{seasons:Season[];periods:SeasonPeriod[];overrides:SeasonOverride[];rates:SeasonRate[];beach:SeasonBeachRate[];roomPrices:SeasonRoomPrice[];mealPrices:SeasonMealPrice[]}; onSaved: () => Promise<void>;
   start: string; setStart: (s: string) => void;
 }) {
   const [selected, setSelected] = useState<Reservation | null>(null);
