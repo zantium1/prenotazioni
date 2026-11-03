@@ -54,7 +54,7 @@ export default function App(){
  {loading?<p>Caricamento…</p>:<>
  {page==="planning"&&<PlanningPage rooms={rooms} reservations={reservations} assignments={assignments} start={start} setStart={setStart}/>}
  {page==="rooms"&&operator.role==="admin"&&<RoomsPage rooms={rooms} types={types} onSaved={refresh}/>}
- {page==="bookings"&&operator.role!=="housekeeping"&&<BookingsPage rooms={rooms} reservations={reservations} onSaved={refresh}/>}
+ {page==="bookings"&&operator.role!=="housekeeping"&&<BookingsPage rooms={rooms} reservations={reservations} assignments={assignments} onSaved={refresh}/>}
  </>}
  {error&&<p className="error" role="alert">{error}</p>}
  </main>;
