@@ -24,7 +24,7 @@ export async function getPlanning(): Promise<{ rooms: Room[]; roomTypes: RoomTyp
   if (t.error) throw t.error;
   if (b.error) throw b.error;
   if (a.error) throw a.error;
-  return { rooms: r.data || [], roomTypes: t.data || [], reservations: b.data || [], assignments: a.data || [] };
+  return { rooms: r.data || [], roomTypes: t.data || [], reservations: (b.data || []).map(row => ({ ...row, guest: Array.isArray(row.guest) ? (row.guest[0] ?? null) : row.guest })), assignments: a.data || [] };
 }
 
 export async function saveRoom(room: { id?: number; number: string; room_type_id: number; bed_count: number; active: boolean }) {
