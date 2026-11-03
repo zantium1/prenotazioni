@@ -58,9 +58,9 @@ export default function App(){
  </nav>
  {loading?<p>Caricamento…</p>:<>
  {page==="planning"&&<PlanningPage rooms={rooms} reservations={reservations} assignments={assignments} dailyServices={dailyServices} types={types} prices={servicePrices} seasonData={{seasons,periods:seasonPeriods,overrides:seasonOverrides,rates:seasonRates,beach:seasonBeachRates}} onSaved={refresh} start={start} setStart={setStart}/>}
- {page==="prices"&&operator.role==="admin"&&<PricesPage types={types} prices={servicePrices} seasonData={{seasons,periods:seasonPeriods,overrides:seasonOverrides,rates:seasonRates,beach:seasonBeachRates}} onSaved={refresh}/>}
+ {page==="prices"&&operator.role==="admin"&&<PricesPage types={types} prices={servicePrices} onSaved={refresh}/>}
  {page==="rooms"&&operator.role==="admin"&&<RoomsPage rooms={rooms} types={types} onSaved={refresh}/>}
- {page==="bookings"&&operator.role!=="housekeeping"&&<BookingsPage rooms={rooms} reservations={reservations} assignments={assignments} dailyServices={dailyServices} types={types} prices={servicePrices} onSaved={refresh}/>}
+ {page==="bookings"&&operator.role!=="housekeeping"&&<BookingsPage rooms={rooms} reservations={reservations} assignments={assignments} dailyServices={dailyServices} types={types} prices={servicePrices} seasonData={{seasons,periods:seasonPeriods,overrides:seasonOverrides,rates:seasonRates,beach:seasonBeachRates}} onSaved={refresh}/>}
  </>}
  {error&&<p className="error" role="alert">{error}</p>}
  </main>;
