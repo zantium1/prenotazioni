@@ -30,6 +30,11 @@ export default function IdentityScanner({onMRZ,onCF}:{onMRZ:(m:MRZ)=>void;onCF:(
  const video=useRef<HTMLVideoElement>(null),reader=useRef<BrowserMultiFormatReader|null>(null),file=useRef<HTMLInputElement>(null);
  function stop(){reader.current?.reset();reader.current=null;if(video.current?.srcObject){(video.current.srcObject as MediaStream).getTracks().forEach(t=>t.stop());video.current.srcObject=null;}setMode(null);}
  useEffect(()=>()=>{reader.current?.reset();if(video.current?.srcObject)(video.current.srcObject as MediaStream).getTracks().forEach(t=>t.stop());},[]);
+ async function openMRZ(){
+  stop();setMessage("");setMode("mrz");
+  try{await new Promise(resolve=>setTimeout(resolve,60));if(!video.current)throw Error("Video non disponibile");const stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:"environment"},width:{ideal:1280},height:{ideal:720}},audio:false});video.current.srcObject=stream;await video.current.play();}catch(e){setMessage("Impossibile aprire la fotocamera: "+String(e));stop();}
+ }
+ async function captureMRZ(){const v=video.current;if(!v||!v.videoWidth)return;const canvas=document.createElement("canvas");canvas.width=v.videoWidth;canvas.height=Math.max(1,Math.round(v.videoHeight*.40));const ctx=canvas.getContext("2d");if(!ctx)return;ctx.drawImage(v,0,v.videoHeight*.30,v.videoWidth,v.videoHeight*.40,0,0,canvas.width,canvas.height);const blob=await new Promise<Blob|null>(resolve=>canvas.toBlob(resolve,"image/png"));stop();if(blob)await scanMRZ(new File([blob],"mrz.png",{type:"image/png"}));}
  async function scanCF(){
   stop();setMessage("");setMode("cf");
   try{
@@ -54,9 +59,9 @@ export default function IdentityScanner({onMRZ,onCF}:{onMRZ:(m:MRZ)=>void;onCF:(
   finally{await worker?.terminate();setBusy(false);}
  }
  return <div className="identity-scanner">
-  <div className="identity-actions"><button type="button" className="secondary" disabled={busy} onClick={()=>file.current?.click()}>📷 Leggi MRZ</button><button type="button" className="secondary" disabled={busy} onClick={()=>void scanCF()}>▥ Leggi codice fiscale</button></div>
+  <div className="identity-actions"><button type="button" className="secondary" disabled={busy} onClick={()=>void openMRZ()}>📷 Leggi MRZ</button><button type="button" className="secondary" disabled={busy} onClick={()=>void scanCF()}>▥ Leggi codice fiscale</button></div>
   <input ref={file} type="file" accept="image/*" capture="environment" hidden onChange={e=>{const f=e.target.files?.[0];if(f)void scanMRZ(f);e.target.value="";}}/>
-  {mode==="cf"&&<div className="scanner-preview"><video ref={video} autoPlay muted playsInline/><p>Inquadra il codice a barre della tessera sanitaria.</p><button type="button" onClick={stop}>Chiudi fotocamera</button></div>}
+  {mode&&<div className="scanner-preview"><div className="camera-frame"><video ref={video} autoPlay muted playsInline/ ><div className={mode==="mrz"?"camera-guide mrz-guide":"camera-guide barcode-guide"} aria-hidden="true"/></div><p>{mode==="mrz"?"Inquadra le tre righe MRZ nel riquadro, poi premi Scatta MRZ.":"Inquadra il codice a barre della tessera sanitaria nel riquadro."}</p><div className="identity-actions">{mode==="mrz"&&<button type="button" disabled={busy} onClick={()=>void captureMRZ()}>Scatta MRZ</button>}<button type="button" className="secondary" onClick={stop}>Chiudi fotocamera</button></div></div>}
   {busy&&<p role="status">Riconoscimento del documento…</p>}
   {message&&<p role="status">{message}</p>}
   <p className="scanner-note">I dati riconosciuti sono modificabili. La foto viene elaborata nel browser e non viene salvata nel gestionale.</p>
