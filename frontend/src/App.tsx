@@ -34,7 +34,7 @@ export default function App(){
      if(!mounted)return;
      setOperator(profile);
      const p=await getPlanning();
-     if(mounted){setRooms(p.rooms);setTypes(p.roomTypes);setReservations(p.reservations);setAssignments(p.assignments);setError("");}
+     if(mounted){setRooms(p.rooms);setTypes(p.roomTypes);setReservations(p.reservations);setAssignments(p.assignments);setDailyServices(p.dailyServices);setError("");}
    }).catch(e=>{if(mounted){setError(e instanceof Error?e.message:String(e));setOperator(null);}})
    .finally(()=>{if(mounted)setLoading(false);});
    return ()=>{mounted=false;};
