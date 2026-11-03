@@ -6,7 +6,7 @@ export const supabase = createClient(
 export type Operator = { id: string; email: string; role: "admin" | "reception" | "housekeeping"; active: boolean };
 export type Room = { id: number; number: string; room_type_id: number; housekeeping_status: string; active: boolean; bed_count: number };
 export type RoomType = { id: number; name: string; capacity: number; base_rate: number };
-export type Reservation = { id: number; code: string; lead_guest_id: number; arrival: string; departure: string; status: string; total: string };
+export type Reservation = { id: number; code: string; lead_guest_id: number; arrival: string; departure: string; status: string; total: string; original_email: string | null; guest: { first_name: string; last_name: string } | null };
 export type Assignment = { id: number; room_id: number; reservation_id: number; arrival: string; departure: string; status: string };
 export async function getOperator(id: string): Promise<Operator> {
   const { data, error } = await supabase.from("app_users").select("id,email,role,active").eq("id", id).single();
@@ -17,7 +17,7 @@ export async function getPlanning(): Promise<{ rooms: Room[]; roomTypes: RoomTyp
   const [r, t, b, a] = await Promise.all([
     supabase.from("rooms").select("id,number,room_type_id,housekeeping_status,active,bed_count").order("number"),
     supabase.from("room_types").select("id,name,capacity,base_rate").order("name"),
-    supabase.from("reservations").select("id,code,lead_guest_id,arrival,departure,status,total").order("arrival", { ascending: false }).limit(200),
+    supabase.from("reservations").select("id,code,lead_guest_id,arrival,departure,status,total,original_email,guest:guests!reservations_lead_guest_id_fkey(first_name,last_name)").order("arrival", { ascending: false }).limit(200),
     supabase.from("room_assignments").select("id,room_id,reservation_id,arrival,departure,status").limit(1000)
   ]);
   if (r.error) throw r.error;
