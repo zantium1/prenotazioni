@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "../api";
 import SeasonEditor from "../components/SeasonEditor";
+import SeasonalRatesEditor from "../components/SeasonalRatesEditor";
 import type { RoomType, ServicePrice } from "../api";
 const labels:Record<string,string>={half_board:"Mezza pensione · al giorno",full_board:"Pensione completa · al giorno",beach_half_day:"Spiaggia · mezza giornata (mattina o pomeriggio)",beach_full_day:"Spiaggia · giornata intera"};
 export default function PricesPage({types,prices,onSaved}:{types:RoomType[];prices:ServicePrice[];onSaved:()=>Promise<void>}){
@@ -18,7 +19,7 @@ export default function PricesPage({types,prices,onSaved}:{types:RoomType[];pric
  await onSaved();setMessage("Listino salvato.");
  }catch(e){setMessage(e instanceof Error?e.message:String(e));}finally{setBusy(false);}}
  function field(key:string,label:string){return <label key={key}>{label}<div className="price-input"><input type="number" min="0" step="0.01" value={values[key]??"0"} onChange={e=>setValues(v=>({...v,[key]:e.target.value}))}/><span>€</span></div></label>;}
- return <section><h2>Listino prezzi</h2><SeasonEditor/><p className="cost-note"><strong>Attenzione:</strong> il listino Santa Zita 2026 è per persona e include il trattamento scelto. Le tariffe qui sotto restano quelle del vecchio modello per camera: non inserire i prezzi del listino 2026 in questi campi finché il calcolo per persona non sarà aggiornato.</p><p>Configura i prezzi unitari. La tariffa della camera è per notte; i servizi sono addebitati soltanto per le giornate selezionate nel dettaglio prenotazione.</p>
+ return <section><h2>Listino prezzi</h2><SeasonEditor/><SeasonalRatesEditor types={types} onSaved={onSaved}/><p className="cost-note"><strong>Attenzione:</strong> il listino Santa Zita 2026 è per persona e include il trattamento scelto. Le tariffe qui sotto restano quelle del vecchio modello per camera: non inserire i prezzi del listino 2026 in questi campi finché il calcolo per persona non sarà aggiornato.</p><p>Configura i prezzi unitari. La tariffa della camera è per notte; i servizi sono addebitati soltanto per le giornate selezionate nel dettaglio prenotazione.</p>
  <h3>Camere · prezzo per notte</h3><div className="price-grid">{types.map(t=>field("room:"+t.id,t.name+" · "+t.capacity+" ospiti"))}</div>
  <h3>Trattamento e spiaggia · prezzo per giornata</h3><div className="price-grid">{prices.map(p=>field("service:"+p.code,labels[p.code]??p.code))}</div>
  <div className="actions"><button disabled={busy} onClick={()=>void save()}>{busy?"Salvataggio…":"Salva listino"}</button></div>{message&&<p role="status">{message}</p>}
