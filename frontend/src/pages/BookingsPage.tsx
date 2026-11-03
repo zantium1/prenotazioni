@@ -2,9 +2,10 @@ import { useState } from "react";
 import type { FormEvent } from "react";
 import { supabase } from "../api";
 import DailyServicesEditor from "../components/DailyServicesEditor";
-import type { Room, Reservation, Assignment, DailyService } from "../api";
+import StayCost from "../components/StayCost";
+import type { Room, Reservation, Assignment, DailyService, RoomType, ServicePrice } from "../api";
 
-export default function BookingsPage({ rooms, reservations, assignments, dailyServices, onSaved }: { rooms: Room[]; reservations: Reservation[]; assignments: Assignment[]; dailyServices: DailyService[]; onSaved: () => Promise<void> }) {
+export default function BookingsPage({ rooms, reservations, assignments, dailyServices, types, prices, onSaved }: { rooms: Room[]; reservations: Reservation[]; assignments: Assignment[]; dailyServices: DailyService[]; types: RoomType[]; prices: ServicePrice[]; onSaved: () => Promise<void> }) {
   const [room, setRoom] = useState(0);
   const [arrival, setArrival] = useState("");
   const [departure, setDeparture] = useState("");
@@ -71,6 +72,7 @@ export default function BookingsPage({ rooms, reservations, assignments, dailySe
         <p><strong>Arrivo:</strong> {detail.arrival} · <strong>Partenza:</strong> {detail.departure}</p>
         <p><strong>Stato:</strong> {detail.status} · <strong>Totale:</strong> € {detail.total}</p>
         <DailyServicesEditor booking={detail} services={dailyServices} onSaved={onSaved} />
+        <StayCost booking={detail} rooms={rooms} types={types} assignments={assignments} daily={dailyServices} prices={prices}/>
         <label>Email originale del cliente<textarea readOnly rows={12} value={detail.original_email || ""} placeholder="Nessuna email registrata per questa prenotazione." /></label>
         <div className="actions"><button onClick={() => setDetail(null)}>Chiudi</button></div>
       </div>
