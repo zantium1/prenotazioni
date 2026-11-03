@@ -30,3 +30,5 @@ textarea{font:inherit;width:100%;padding:11px;border:1px solid #c8d1de;border-ra
 .planning-booking:hover{background:#cbdff9}
 .planning-guest{display:block;font-weight:650;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.82rem}
 .planning-sub{font-size:.69rem;opacity:.8}
+
+.planning-legend{display:flex;flex-wrap:wrap;gap:8px 15px;font-size:.76rem;color:#465971;margin:10px 0 16px}.planning-legend span{background:#edf3fa;padding:5px 9px;border-radius:6px}.planning-icons{font-size:.73rem;font-weight:700;min-height:1em}.planning-icons:empty{display:none}.daily-editor{margin:18px 0;border-top:1px solid #dce3ec;padding-top:12px}.daily-editor table{min-width:590px}.daily-editor select{min-width:145px;font-size:.83rem}.daily-editor p{font-size:.85rem}.booking-detail{width:min(100%,850px)}
