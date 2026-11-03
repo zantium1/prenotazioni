@@ -6,9 +6,9 @@ import StayCost from "../components/StayCost";
 import GuestEditor from "../components/GuestEditor";
 import OccupancyEditor from "../components/OccupancyEditor";
 import IdentityScanner from "../components/IdentityScanner";
-import type { Room, Reservation, Assignment, DailyService, RoomType, ServicePrice, Season, SeasonPeriod, SeasonOverride, SeasonRate, SeasonBeachRate, SeasonRoomPrice, SeasonMealPrice } from "../api";
+import type { Room, Reservation, Assignment, DailyService, RoomType, ServicePrice, Season, SeasonPeriod, SeasonOverride, SeasonRate, SeasonBeachRate, SeasonRoomPrice, SeasonMealPrice, SeasonGuestSupplement } from "../api";
 
-export default function BookingsPage({ rooms, reservations, assignments, dailyServices, types, prices, seasonData, onSaved }: { rooms: Room[]; reservations: Reservation[]; assignments: Assignment[]; dailyServices: DailyService[]; types: RoomType[]; prices: ServicePrice[]; seasonData:{seasons:Season[];periods:SeasonPeriod[];overrides:SeasonOverride[];rates:SeasonRate[];beach:SeasonBeachRate[];roomPrices:SeasonRoomPrice[];mealPrices:SeasonMealPrice[]}; onSaved: () => Promise<void> }) {
+export default function BookingsPage({ rooms, reservations, assignments, dailyServices, types, prices, seasonData, onSaved }: { rooms: Room[]; reservations: Reservation[]; assignments: Assignment[]; dailyServices: DailyService[]; types: RoomType[]; prices: ServicePrice[]; seasonData:{seasons:Season[];periods:SeasonPeriod[];overrides:SeasonOverride[];rates:SeasonRate[];beach:SeasonBeachRate[];roomPrices:SeasonRoomPrice[];mealPrices:SeasonMealPrice[];supplements:SeasonGuestSupplement[]}; onSaved: () => Promise<void> }) {
   const [room, setRoom] = useState(0);
   const [arrival, setArrival] = useState("");
   const [departure, setDeparture] = useState("");
