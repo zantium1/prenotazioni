@@ -22,16 +22,16 @@ export function calculateStay(booking:Reservation,rooms:Room[],types:RoomType[],
   const relevant=counts.filter(([,n])=>n>0);
   const roomRate=seasonData?.roomPrices.find(r=>r.season_id===seasonId&&r.room_type_id===roomTypeId);
   if(roomRate)room=Number(roomRate.price);
-  const missingGroups=relevant.filter(([group])=>!seasonData?.supplements.some(r=>r.season_id===seasonId&&r.guest_group===group)).map(([group])=>group);
+  const missingGroups=relevant.filter(([group])=>group!=="adult"&&!seasonData?.supplements.some(r=>r.season_id===seasonId&&r.guest_group===group)).map(([group])=>group);
   const supplements=relevant.reduce((sum,[group,count])=>sum+count*Number(seasonData?.supplements.find(r=>r.season_id===seasonId&&r.guest_group===group)?.price??0),0);
   room+=supplements;
   const mealRates=mealPlan==="room_only"?[]:relevant.map(([group,count])=>({count,rate:seasonData?.mealPrices.find(r=>r.season_id===seasonId&&r.guest_group===group&&r.meal_plan===mealPlan)}));
   const mealReady=mealPlan==="room_only"||mealRates.every(r=>r.rate!==undefined);
-  if(mealPlan!=="room_only"&&mealReady)meal=mealRates.reduce((sum,x)=>sum+x.count*Number(x.rate?.price??0),0);
+  if(mealPlan!=="room_only")meal=mealRates.reduce((sum,x)=>sum+x.count*Number(x.rate?.price??0),0);
   const seasonReady=Boolean(roomRate&&mealReady&&missingGroups.length===0);
   const beachCode=s?.beach_use==="full_day"?"full_day":s?.beach_use==="morning"||s?.beach_use==="afternoon"?"half_day":null;
   if(beachCode&&seasonId){const bp=seasonData?.beach.find(b=>b.season_id===seasonId&&b.beach_use===beachCode);if(bp)beach=Number(bp.price);}
-  return {day,room,meal,beach,total:room+meal+beach,seasonName,seasonReady,missingGroups};
+  return {day,room,meal,beach,total:room+meal+beach,seasonName,seasonReady,missingGroups,missingMeals:mealRates.filter(x=>!x.rate).length};
  });
  return {rows,roomTotal:rows.reduce((n,r)=>n+r.room,0),mealTotal:rows.reduce((n,r)=>n+r.meal,0),beachTotal:rows.reduce((n,r)=>n+r.beach,0),total:rows.reduce((n,r)=>n+r.total,0)};
 }
@@ -39,7 +39,7 @@ export default function StayCost({booking,rooms,types,assignments,daily,prices,s
  const c=calculateStay(booking,rooms,types,assignments,daily,prices,seasonData);
  return <section className="stay-cost"><h3>Preventivo soggiorno</h3><p>Ospiti: {booking.adults_count} adulti, {booking.children_0_6_count} bambini 0–6, {booking.children_7_12_count} bambini 7–12.</p><p>Calcolo automatico: una notte per ciascuna data dal giorno di arrivo al giorno precedente la partenza. I servizi si addebitano soltanto nei giorni in cui sono impostati.</p>
  <div className="table-scroll"><table><thead><tr><th>Giorno</th><th>Stagione</th><th>Camera / trattamento</th><th>Trattamento</th><th>Spiaggia</th><th>Totale</th></tr></thead><tbody>{c.rows.map(r=><tr key={r.day}><td>{r.day.slice(8)}/{r.day.slice(5,7)}</td><td>{r.seasonName}{!r.seasonReady?" *":""}</td><td>{euro(r.room)}</td><td>{euro(r.meal)}</td><td>{euro(r.beach)}</td><td><strong>{euro(r.total)}</strong></td></tr>)}</tbody></table></div>
- {c.rows.some(r=>r.missingGroups.length>0)&&<p className="error" role="alert">Attenzione: supplementi per ospite non impostati per alcune giornate o fasce d’età. Il totale è provvisorio e non comprende queste quote. Inserisci i prezzi nel Listino prezzi → Supplementi pernottamento, anche 0 € se la fascia è gratuita.</p>}
+ {c.rows.some(r=>r.missingGroups.length>0||r.missingMeals>0)&&<p className="error" role="alert">Attenzione: tariffe di bambini o trattamenti mancanti per alcune giornate. Il totale è provvisorio e non comprende le quote non definite. Completa il Listino prezzi → Supplementi pernottamento e Trattamenti; imposta 0 € solo quando il servizio è gratuito.</p>}
  <div className="cost-summary"><span>Camere: {euro(c.roomTotal)}</span><span>Trattamento: {euro(c.mealTotal)}</span><span>Spiaggia: {euro(c.beachTotal)}</span><strong>Totale soggiorno: {euro(c.total)}</strong></div>
  <p className="cost-note">* Quando una tariffa stagionale per camera o trattamento non è impostata, si usa il relativo prezzo generale. Camera e trattamento sono voci separate. Prima bozza: importi calcolati sui listini attuali, senza sconti, acconti o tariffe storicizzate. Non costituisce ancora un conto definitivo.</p>
  </section>;
