@@ -3,7 +3,7 @@ import {supabase} from "../api";
 type Season={id:number;name:string;sort_order:number};
 type Period={id:number;season_id:number;start_md:string;end_md:string;description:string};
 type Override={id:number;season_id:number;month_day:string;year:number|null;description:string};
-const it=(md:string)=>md.slice(3,5)+"/"+md.slice(0,2);
+const it=(md:string)=>/^\\d{2}-\\d{2}$/.test(md)?md.slice(3,5)+"/"+md.slice(0,2):md;
 const md=(day:string)=>{const m=/^(\d{2})\/(\d{2})$/.exec(day.trim());return m?m[2]+"-"+m[1]:"";};
 export default function SeasonEditor(){
  const [seasons,setSeasons]=useState<Season[]>([]),[periods,setPeriods]=useState<Period[]>([]),[overrides,setOverrides]=useState<Override[]>([]);
