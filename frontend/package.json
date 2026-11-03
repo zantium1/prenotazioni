@@ -11,7 +11,9 @@
   "dependencies": {
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "@supabase/supabase-js": "^2.57.0"
+    "@supabase/supabase-js": "^2.57.0",
+    "tesseract.js": "^6.0.1",
+    "@zxing/library": "^0.21.3"
   },
   "devDependencies": {
     "@types/react": "^19.0.0",
