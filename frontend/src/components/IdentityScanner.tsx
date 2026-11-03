@@ -37,7 +37,7 @@ export default function IdentityScanner({onMRZ,onCF}:{onMRZ:(m:MRZ)=>void;onCF:(
    const r=new BrowserMultiFormatReader(hints,350);reader.current=r;
    await new Promise(resolve=>setTimeout(resolve,50));
    if(!video.current)throw Error("Video non disponibile");
-   await r.decodeFromVideoDevice(undefined,video.current,(result)=>{if(result){const value=result.getText().toUpperCase().replace(/[^A-Z0-9]/g,"");if(/^[A-Z0-9]{16}$/.test(value)){onCF(value);setMessage("Codice fiscale acquisito: verifica il dato.");stop();}}});
+   await r.decodeFromVideoDevice(null,video.current,(result)=>{if(result){const value=result.getText().toUpperCase().replace(/[^A-Z0-9]/g,"");if(/^[A-Z0-9]{16}$/.test(value)){onCF(value);setMessage("Codice fiscale acquisito: verifica il dato.");stop();}}});
   }catch(e){setMessage("Fotocamera non disponibile: "+String(e));stop();}
  }
  async function scanMRZ(image:File){
