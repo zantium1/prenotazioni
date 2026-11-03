@@ -8,7 +8,7 @@ import OccupancyEditor from "../components/OccupancyEditor";
 import IdentityScanner from "../components/IdentityScanner";
 import type { Room, Reservation, Assignment, DailyService, RoomType, ServicePrice, Season, SeasonPeriod, SeasonOverride, SeasonRate, SeasonBeachRate } from "../api";
 
-export default function BookingsPage({ rooms, reservations, assignments, dailyServices, types, prices, seasonData, onSaved }: { rooms: Room[]; reservations: Reservation[]; assignments: Assignment[]; dailyServices: DailyService[]; types: RoomType[]; prices: ServicePrice[]; seasonData:{seasons:Season[];periods:SeasonPeriod[];overrides:SeasonOverride[];rates:SeasonRate[];beach:SeasonBeachRate[]}; onSaved: () => Promise<void> }) {
+export default function BookingsPage({ rooms, reservations, assignments, dailyServices, types, prices, seasonData, onSaved }: { rooms: Room[]; reservations: Reservation[]; assignments: Assignment[]; dailyServices: DailyService[]; types: RoomType[]; prices: ServicePrice[]; seasonData:{seasons:Season[];periods:SeasonPeriod[];overrides:SeasonOverride[];rates:SeasonRate[];beach:SeasonBeachRate[];roomPrices:SeasonRoomPrice[];mealPrices:SeasonMealPrice[]}; onSaved: () => Promise<void> }) {
   const [room, setRoom] = useState(0);
   const [arrival, setArrival] = useState("");
   const [departure, setDeparture] = useState("");
