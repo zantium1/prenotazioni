@@ -40,7 +40,7 @@ export default function PlanningPage({ rooms, reservations, assignments, dailySe
               const service = booking ? dailyServices.find(s => s.reservation_id === booking.id && s.service_date === day) : undefined;
               return <td key={day} className={assignment ? "occupied" : "free-cell"}>
                 {assignment ? <button type="button" className="planning-booking" disabled={!booking}
-                  title={booking ? `${name} · ${booking.arrival} → ${booking.departure} · ${booking.code}` : "Camera occupata"}
+                  title={booking ? `selected · ${booking.arrival} → ${booking.departure} · ${booking.code}` : "Camera occupata"}
                   onClick={() => booking && setSelected(booking)}>
                   <span className="planning-guest">{name}</span>
                   <span className="planning-icons">{service?.meal_plan === "half_board" ? "🍽️ MP" : service?.meal_plan === "full_board" ? "🍽️ PC" : ""}{service?.beach_use === "morning" ? " 🏖️½" : service?.beach_use === "afternoon" ? " 🌤️½" : service?.beach_use === "full_day" ? " 🏖️" : ""}</span>
@@ -57,7 +57,7 @@ export default function PlanningPage({ rooms, reservations, assignments, dailySe
       <div className="modal booking-detail" role="dialog" aria-modal="true" aria-labelledby="planning-detail-title">
         <div className="toolbar"><h2 id="planning-detail-title">Prenotazione {selected.code}</h2><button className="secondary" onClick={() => setSelected(null)} aria-label="Chiudi">✕</button></div>
         <p><strong>Ospite:</strong> {guestName(selected)}</p>
-        <p><strong>Data di nascita:</strong> {${name}.guest?.birth_date || "—"} · <strong>Codice fiscale:</strong> {${name}.guest?.tax_code || "—"}</p>
+        <p><strong>Data di nascita:</strong> {selected.guest?.birth_date || "—"} · <strong>Codice fiscale:</strong> {selected.guest?.tax_code || "—"}</p>
         <p><strong>Arrivo:</strong> {selected.arrival}</p>
         <p><strong>Partenza:</strong> {selected.departure}</p>
         <p><strong>Stato:</strong> {selected.status}</p>
