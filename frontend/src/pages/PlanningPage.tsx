@@ -2,6 +2,7 @@ import { useState } from "react";
 import DailyServicesEditor from "../components/DailyServicesEditor";
 import StayCost from "../components/StayCost";
 import GuestEditor from "../components/GuestEditor";
+import OccupancyEditor from "../components/OccupancyEditor";
 import type { Assignment, DailyService, RoomType, ServicePrice, Reservation, Room } from "../api";
 
 function addDays(day: string, count: number) {
@@ -59,6 +60,7 @@ export default function PlanningPage({ rooms, reservations, assignments, dailySe
         <div className="toolbar"><h2 id="planning-detail-title">Prenotazione {selected.code}</h2><button className="secondary" onClick={() => setSelected(null)} aria-label="Chiudi">✕</button></div>
         <p><strong>Ospite:</strong> {guestName(selected)}</p>
         <GuestEditor booking={selected} onSaved={onSaved}/>
+        <OccupancyEditor booking={selected} onSaved={onSaved}/>
         <p><strong>Arrivo:</strong> {selected.arrival}</p>
         <p><strong>Partenza:</strong> {selected.departure}</p>
         <p><strong>Stato:</strong> {selected.status}</p>
