@@ -3,6 +3,7 @@ import type { FormEvent } from "react";
 import { supabase } from "../api";
 import DailyServicesEditor from "../components/DailyServicesEditor";
 import StayCost from "../components/StayCost";
+import IdentityScanner from "../components/IdentityScanner";
 import type { Room, Reservation, Assignment, DailyService, RoomType, ServicePrice } from "../api";
 
 export default function BookingsPage({ rooms, reservations, assignments, dailyServices, types, prices, onSaved }: { rooms: Room[]; reservations: Reservation[]; assignments: Assignment[]; dailyServices: DailyService[]; types: RoomType[]; prices: ServicePrice[]; onSaved: () => Promise<void> }) {
@@ -11,6 +12,8 @@ export default function BookingsPage({ rooms, reservations, assignments, dailySe
   const [departure, setDeparture] = useState("");
   const [first, setFirst] = useState("");
   const [last, setLast] = useState("");
+  const [birthDate,setBirthDate]=useState("");
+  const [taxCode,setTaxCode]=useState("");
   const [total, setTotal] = useState("0");
   const [originalEmail, setOriginalEmail] = useState("");
   const [detail, setDetail] = useState<Reservation | null>(null);
@@ -22,15 +25,15 @@ export default function BookingsPage({ rooms, reservations, assignments, dailySe
     if (!room || !arrival || !departure || departure <= arrival) { setMessage("Controlla camera e date."); return; }
     setBusy(true);
     try {
-      const { data, error } = await supabase.rpc("create_hotel_reservation", {
+      const { data, error } = await supabase.rpc("create_hotel_reservation_with_identity", {
         p_room_id: room, p_arrival: arrival, p_departure: departure,
         p_first_name: first, p_last_name: last, p_total: Number(total),
-        p_original_email: originalEmail
+        p_original_email: originalEmail, p_birth_date: birthDate || null, p_tax_code: taxCode.trim().toUpperCase()
       });
       if (error) throw error;
       await onSaved();
       setMessage("Prenotazione creata: " + data);
-      setFirst(""); setLast(""); setOriginalEmail("");
+      setFirst(""); setLast(""); setBirthDate(""); setTaxCode(""); setOriginalEmail("");
     } catch (e) { setMessage(e instanceof Error ? e.message : String(e)); }
     finally { setBusy(false); }
   }
@@ -51,6 +54,9 @@ export default function BookingsPage({ rooms, reservations, assignments, dailySe
         <label>Partenza<input required type="date" min={arrival || undefined} value={departure} onChange={e => setDeparture(e.target.value)} /></label>
         <label>Nome ospite<input required maxLength={100} value={first} onChange={e => setFirst(e.target.value)} /></label>
         <label>Cognome ospite<input required maxLength={100} value={last} onChange={e => setLast(e.target.value)} /></label>
+        <label>Data di nascita<input type="date" max={new Date().toISOString().slice(0,10)} value={birthDate} onChange={e=>setBirthDate(e.target.value)}/></label>
+        <label>Codice fiscale<input maxLength={16} autoCapitalize="characters" placeholder="16 caratteri" value={taxCode} onChange={e=>setTaxCode(e.target.value.toUpperCase())}/></label>
+        <div className="full-width"><IdentityScanner onMRZ={m=>{setFirst(m.first);setLast(m.last);setBirthDate(m.birth);}} onCF={setTaxCode}/></div>
         <label>Totale previsto (€)<input required type="number" min={0} step="0.01" value={total} onChange={e => setTotal(e.target.value)} /></label>
         <label className="full-width">Testo originale dell'email<textarea rows={7} maxLength={50000} placeholder="Incolla qui il testo della mail del cliente…" value={originalEmail} onChange={e => setOriginalEmail(e.target.value)} /></label>
         <button disabled={busy || !room}>{busy ? "Salvataggio…" : "Conferma prenotazione"}</button>
