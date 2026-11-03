@@ -27,7 +27,7 @@ export function parseMRZ(raw:string):MRZ|null{
 }
 export default function IdentityScanner({onMRZ,onCF}:{onMRZ:(m:MRZ)=>void;onCF:(cf:string)=>void}){
  const [mode,setMode]=useState<"mrz"|"cf"|null>(null),[busy,setBusy]=useState(false),[message,setMessage]=useState("");
- const video=useRef<HTMLVideoElement>(null),reader=useRef<BrowserMultiFormatReader|null>(null),file=useRef<HTMLInputElement>(null);
+ const video=useRef<HTMLVideoElement>(null),reader=useRef<BrowserMultiFormatReader|null>(null);
  function stop(){reader.current?.reset();reader.current=null;if(video.current?.srcObject){(video.current.srcObject as MediaStream).getTracks().forEach(t=>t.stop());video.current.srcObject=null;}setMode(null);}
  useEffect(()=>()=>{reader.current?.reset();if(video.current?.srcObject)(video.current.srcObject as MediaStream).getTracks().forEach(t=>t.stop());},[]);
  async function openMRZ(){
@@ -60,8 +60,7 @@ export default function IdentityScanner({onMRZ,onCF}:{onMRZ:(m:MRZ)=>void;onCF:(
  }
  return <div className="identity-scanner">
   <div className="identity-actions"><button type="button" className="secondary" disabled={busy} onClick={()=>void openMRZ()}>📷 Leggi MRZ</button><button type="button" className="secondary" disabled={busy} onClick={()=>void scanCF()}>▥ Leggi codice fiscale</button></div>
-  <input ref={file} type="file" accept="image/*" capture="environment" hidden onChange={e=>{const f=e.target.files?.[0];if(f)void scanMRZ(f);e.target.value="";}}/>
-  {mode&&<div className="scanner-preview"><div className="camera-frame"><video ref={video} autoPlay muted playsInline/ ><div className={mode==="mrz"?"camera-guide mrz-guide":"camera-guide barcode-guide"} aria-hidden="true"/></div><p>{mode==="mrz"?"Inquadra le tre righe MRZ nel riquadro, poi premi Scatta MRZ.":"Inquadra il codice a barre della tessera sanitaria nel riquadro."}</p><div className="identity-actions">{mode==="mrz"&&<button type="button" disabled={busy} onClick={()=>void captureMRZ()}>Scatta MRZ</button>}<button type="button" className="secondary" onClick={stop}>Chiudi fotocamera</button></div></div>}
+  {mode&&<div className="scanner-preview"><div className="camera-frame"><video ref={video} autoPlay muted playsInline/><div className={mode==="mrz"?"camera-guide mrz-guide":"camera-guide barcode-guide"} aria-hidden="true"/></div><p>{mode==="mrz"?"Inquadra le tre righe MRZ nel riquadro, poi premi Scatta MRZ.":"Inquadra il codice a barre della tessera sanitaria nel riquadro."}</p><div className="identity-actions">{mode==="mrz"&&<button type="button" disabled={busy} onClick={()=>void captureMRZ()}>Scatta MRZ</button>}<button type="button" className="secondary" onClick={stop}>Chiudi fotocamera</button></div></div>}
   {busy&&<p role="status">Riconoscimento del documento…</p>}
   {message&&<p role="status">{message}</p>}
   <p className="scanner-note">I dati riconosciuti sono modificabili. La foto viene elaborata nel browser e non viene salvata nel gestionale.</p>
