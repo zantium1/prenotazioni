@@ -4,6 +4,7 @@ import { supabase } from "../api";
 import DailyServicesEditor from "../components/DailyServicesEditor";
 import StayCost from "../components/StayCost";
 import GuestEditor from "../components/GuestEditor";
+import OccupancyEditor from "../components/OccupancyEditor";
 import IdentityScanner from "../components/IdentityScanner";
 import type { Room, Reservation, Assignment, DailyService, RoomType, ServicePrice } from "../api";
 
@@ -80,6 +81,7 @@ export default function BookingsPage({ rooms, reservations, assignments, dailySe
         <p><strong>Codice:</strong> {detail.code}</p>
         <p><strong>Ospite:</strong> {guestName(detail)}</p>
         <GuestEditor booking={detail} onSaved={onSaved}/>
+        <OccupancyEditor booking={detail} onSaved={onSaved}/>
         <p><strong>Camera:</strong> {roomNumber(detail)}</p>
         <p><strong>Arrivo:</strong> {detail.arrival} · <strong>Partenza:</strong> {detail.departure}</p>
         <p><strong>Stato:</strong> {detail.status} · <strong>Totale:</strong> € {detail.total}</p>
